@@ -1,9 +1,9 @@
 package lifeishack.jp.tipping_for_runner
 
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import com.linecorp.linesdk.LineApiResponse
+import android.support.v7.app.AppCompatActivity
+import android.widget.Button
 import com.linecorp.linesdk.LineProfile
 import com.linecorp.linesdk.api.LineApiClient
 import com.linecorp.linesdk.api.LineApiClientBuilder
@@ -13,6 +13,7 @@ import com.linecorp.linesdk.api.LineApiClientBuilder
 class ChoiceActivity : AppCompatActivity() {
 
     var lineApiClient: LineApiClient? = null
+    private var toSpectatorButton: Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +30,10 @@ class ChoiceActivity : AppCompatActivity() {
         println(profile.displayName)
         println(profile.userId)
 
-
-
+        toSpectatorButton = findViewById(R.id.toSpectator) as Button
+        toSpectatorButton?.setOnClickListener {
+            val intent: Intent = Intent(this@ChoiceActivity, SpectatorActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
