@@ -32,8 +32,28 @@ class ChoiceActivity : AppCompatActivity() {
 
         toSpectatorButton = findViewById(R.id.toSpectator) as Button
         toSpectatorButton?.setOnClickListener {
-            val intent: Intent = Intent(this@ChoiceActivity, SpectatorActivity::class.java)
-            startActivity(intent)
+            val spectatorIntent: Intent = Intent(this@ChoiceActivity, SpectatorActivity::class.java)
+            startActivity(spectatorIntent)
+        }
+
+        tapRunnerButton()
+        tapAudienceButton()
+    }
+
+    fun tapRunnerButton() {
+        val runnerButton: Button = findViewById(R.id.choice_runner)
+        runnerButton.setOnClickListener {
+            var runnerFormIntent: Intent = Intent(this, RunnerFormActivity::class.java)
+            startActivity(runnerFormIntent)
         }
     }
+
+    fun tapAudienceButton() {
+        val audienceButton: Button = findViewById(R.id.choice_audience)
+        audienceButton.setOnClickListener {
+            var audienceFormIntent: Intent = Intent(this, AudienceFormActivity::class.java)
+            startActivity(audienceFormIntent)
+        }
+    }
+
 }

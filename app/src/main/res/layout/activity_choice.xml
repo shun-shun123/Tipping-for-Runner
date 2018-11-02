@@ -6,20 +6,33 @@
     android:layout_height="match_parent"
     tools:context=".ChoiceActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ChoiceActivity"
-        tools:layout_editor_absoluteX="136dp"
-        tools:layout_editor_absoluteY="231dp" />
-
     <Button
         android:id="@+id/toSpectator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
         android:text="ToSpectator"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="322dp" />
+        app:layout_constraintTop_toBottomOf="@+id/choice_audience" />
+
+    <Button
+        android:id="@+id/choice_runner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:text="Runner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/choice_audience"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="Audience"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/choice_runner" />
 </android.support.constraint.ConstraintLayout>
