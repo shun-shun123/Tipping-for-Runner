@@ -19,7 +19,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ChoiceActivity" />
-        <activity android:name=".SpectatorActivity"></activity>
+        <activity android:name=".SpectatorActivity" />
+        <activity android:name=".RunnerFormActivity" />
+        <activity android:name=".AudienceFormActivity"></activity>
     </application>
 
 </manifest>
