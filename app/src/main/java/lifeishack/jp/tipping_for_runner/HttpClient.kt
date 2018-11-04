@@ -10,7 +10,7 @@ import org.json.JSONObject
 
 class HttpClient {
     private val TAG: String = "HttpClientTAG"
-    private val baseUrl: String = "https://0cb51a24.ngrok.io"
+    private val baseUrl: String = "https://d15af500.ngrok.io/marathon"
 
     init {
         FuelManager.instance.basePath = baseUrl
