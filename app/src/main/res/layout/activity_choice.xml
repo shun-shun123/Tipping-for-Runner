@@ -7,14 +7,14 @@
     tools:context=".ChoiceActivity">
 
     <Button
-        android:id="@+id/toSpectator"
+        android:id="@+id/audience"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:text="ToSpectator"
+        android:text="AUDIENCE"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/choice_audience" />
+        tools:layout_editor_absoluteY="177dp" />
 
     <Button
         android:id="@+id/choice_runner"
@@ -26,13 +26,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/choice_audience"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="Audience"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/choice_runner" />
 </android.support.constraint.ConstraintLayout>

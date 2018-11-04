@@ -27,7 +27,7 @@ class ChoiceActivity : AppCompatActivity() {
         //これで名前とかidとかとれるっぽい
         println(profile.displayName)
 
-        val toSpectatorButton: Button = findViewById(R.id.toSpectator)
+        val toSpectatorButton: Button = findViewById(R.id.audience)
         toSpectatorButton.setOnClickListener {
             val intent: Intent = Intent(this@ChoiceActivity, SpectatorActivity::class.java)
             intent.putExtra("LINE_ID", profile.userId)
