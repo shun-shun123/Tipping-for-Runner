@@ -18,6 +18,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private val httpClient = HttpClient()
     private val allMarathonData: MutableList<Pair<Int, String>> = httpClient.downlaodMarathonData()
 
+    private var lineId: String = ""
+
     // シェイク検知に必要な定数・変数
     private val SHAKE_TIMEOUT = 500
     private val FORCE_THRESHOLD = 6
@@ -29,6 +31,9 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_spectator)
         Log.d("HttpClientTAG", "$allMarathonData")
+
+        lineId = intent.getStringExtra("LINE_ID")
+        Log.d("HttpClientTAG", lineId)
 
         mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         mAccelerometer = mSensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)

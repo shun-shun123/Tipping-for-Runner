@@ -13,6 +13,7 @@ class RunnerFormActivity : AppCompatActivity() {
     var submitButton: Button? = null
     private val httpClient = HttpClient()
     private val allMarathonData: MutableList<Pair<Int, String>> = httpClient.downlaodMarathonData()
+    private var lineId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +23,9 @@ class RunnerFormActivity : AppCompatActivity() {
         marathonNameText = findViewById(R.id.marathonName)
         bibNumberText = findViewById(R.id.bibNumber)
         submitButton = findViewById(R.id.submitButton)
+
+        lineId = intent.getStringExtra("LINE_ID")
+        Log.d("HttpClientTAG", lineId)
 
         submitRunnerInfo()
     }

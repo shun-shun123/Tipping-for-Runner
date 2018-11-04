@@ -10,7 +10,7 @@ import org.json.JSONObject
 
 class HttpClient {
     private val TAG: String = "HttpClientTAG"
-    private val baseUrl: String = "https://d15af500.ngrok.io/marathon"
+    private val baseUrl: String = "https://d15af500.ngrok.io"
 
     init {
         FuelManager.instance.basePath = baseUrl
@@ -25,6 +25,7 @@ class HttpClient {
                     allMarathonData = copyMarathonData(json)
                 }
                 is Result.Failure -> {
+                    Log.d(TAG, "Faild to GET")
                 }
             }
         }
