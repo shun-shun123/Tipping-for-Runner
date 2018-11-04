@@ -1,5 +1,7 @@
 package lifeishack.jp.tipping_for_runner
 
+import android.util.Log
+import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
@@ -14,21 +16,29 @@ class HttpClient {
 
     private fun downlaodMarathonData(): String {
         var responseBody: String = ""
-        "/marathon".httpGet().response { request, response, result ->
+        "/marathon".httpGet().responseJson { request, response, result ->
             when (result) {
                 is Result.Success -> {
-                    responseBody = String(response.data)
+                    val json = result.value.obj()
+                    Log.d(TAG, "$result")
+                    Log.d(TAG, "${json["id"]}")
+//                    val results = json.get("body") as JSONArray
+//                    val data1 = results[0] as JSONObject
+                    Log.d(TAG, "response: ${response}")
                 }
                 is Result.Failure -> {
                     responseBody = "ERROR"
                 }
             }
         }
+        Log.d(TAG, responseBody)
         return responseBody
     }
 
     public fun fetchMarathonName() {
         val marathonData: String = downlaodMarathonData()
-
     }
 }
+
+
+data class MarathonID(var id: Long, var name: String, var created_at: String, var updated_at: String)
