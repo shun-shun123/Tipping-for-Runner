@@ -7,6 +7,13 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.android.extension.responseJson
+import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.result.Result
+import org.jetbrains.anko.doAsync
+import org.json.JSONArray
+import org.json.JSONObject
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -15,8 +22,6 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private var mSensorManager: SensorManager? = null
     private var mAccelerometer: Sensor? = null
     private val TAG: String = "SpectatorActivity"
-    private val httpClient = HttpClient()
-    private val allMarathonData: MutableList<Pair<Int, String>> = httpClient.downlaodMarathonData()
 
     private var lineId: String = ""
 
@@ -27,10 +32,16 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private var mShakeCount = 0
     private var preAccel: Float = 1.0F
 
+    private var allMarathonData: MutableList<Pair<Int, String>> = mutableListOf()
+    private val baseUrl: String = "https://d15af500.ngrok.io"
+
+    init {
+        FuelManager.instance.basePath = baseUrl
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_spectator)
-        Log.d("HttpClientTAG", "$allMarathonData")
 
         lineId = intent.getStringExtra("LINE_ID")
         Log.d("HttpClientTAG", lineId)
@@ -42,6 +53,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
         mSensorManager?.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+        allMarathonData = downloadMarathonData()
+        Log.d("HttpClientTAG", "onResume: $allMarathonData")
     }
 
     override fun onPause() {
@@ -76,5 +89,33 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         Log.d(TAG, "Sensor Accuracy Changed")
+    }
+
+    private fun downloadMarathonData(): MutableList<Pair<Int, String>> {
+        doAsync {
+            val (request, response, result) = Fuel.get("/marathon").responseJson()
+            if (result.component2() != null) {
+                Log.d("HttpClientTAG", "ERROR: ${result.component2()}")
+            }
+            when (result) {
+                is Result.Success -> {
+                    val json = result.value.array()
+                    copyMarathonData(json)
+                    Log.d("HttpClientTAG", "allMarathonDataにコピーしたよ\n${allMarathonData}")
+                }
+                is Result.Failure -> {
+                    Log.d("HttpClientTAG", "ERRORYEHAAAAAAAAAAA")
+                }
+            }
+        }
+        return allMarathonData
+    }
+
+    private fun copyMarathonData(jsonArray: JSONArray) {
+        allMarathonData = mutableListOf()
+        for (i in 0..jsonArray.length() - 1) {
+            val jsonObj = jsonArray[i] as JSONObject
+            allMarathonData.add(Pair(jsonObj.get("id").toString().toInt(), jsonObj.get("name").toString()))
+        }
     }
 }
