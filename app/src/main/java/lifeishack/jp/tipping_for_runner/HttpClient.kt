@@ -5,6 +5,8 @@ import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
+import org.json.JSONArray
+import org.json.JSONObject
 
 class HttpClient {
     private val TAG: String = "HttpClientTAG"
@@ -14,31 +16,31 @@ class HttpClient {
         FuelManager.instance.basePath = baseUrl
     }
 
-    private fun downlaodMarathonData(): String {
-        var responseBody: String = ""
+    public fun downlaodMarathonData(): MutableList<Pair<Int, String>> {
+        var allMarathonData: MutableList<Pair<Int, String>> = mutableListOf()
         "/marathon".httpGet().responseJson { request, response, result ->
             when (result) {
                 is Result.Success -> {
-                    val json = result.value.obj()
-                    Log.d(TAG, "$result")
-                    Log.d(TAG, "${json["id"]}")
-//                    val results = json.get("body") as JSONArray
-//                    val data1 = results[0] as JSONObject
-                    Log.d(TAG, "response: ${response}")
+                    val json = result.value.array()
+                    allMarathonData = copyMarathonData(json)
                 }
                 is Result.Failure -> {
-                    responseBody = "ERROR"
                 }
             }
         }
-        Log.d(TAG, responseBody)
-        return responseBody
+        Log.d(TAG, "$allMarathonData")
+        return allMarathonData
     }
 
-    public fun fetchMarathonName() {
-        val marathonData: String = downlaodMarathonData()
+    private fun copyMarathonData(jsonArray: JSONArray): MutableList<Pair<Int, String>> {
+        val allMarathonData: MutableList<Pair<Int, String>> = mutableListOf()
+        for (i in 0..jsonArray.length() - 1) {
+            val jsonObj = jsonArray[i] as JSONObject
+            allMarathonData.add(Pair(jsonObj.get("id").toString().toInt(), jsonObj.get("name").toString()))
+        }
+        return allMarathonData
     }
 }
 
 
-data class MarathonID(var id: Long, var name: String, var created_at: String, var updated_at: String)
+data class MarathonID(var id: Long, var name: String)

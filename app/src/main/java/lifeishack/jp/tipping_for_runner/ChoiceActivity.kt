@@ -15,12 +15,10 @@ class ChoiceActivity : AppCompatActivity() {
 
     var lineApiClient: LineApiClient? = null
     private var toSpectatorButton: Button? = null
-    private val httpClient: HttpClient = HttpClient()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choice)
-        httpClient.fetchMarathonName()
 
         //LineAPIClientの初期化として必要なようです
         val apiClientBuilder = LineApiClientBuilder(applicationContext, "1619051002")

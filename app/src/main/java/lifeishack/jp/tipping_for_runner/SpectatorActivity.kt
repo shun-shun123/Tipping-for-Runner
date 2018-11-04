@@ -15,6 +15,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private var mSensorManager: SensorManager? = null
     private var mAccelerometer: Sensor? = null
     private val TAG: String = "SpectatorActivity"
+    private val httpClient = HttpClient()
+    private val allMarathonData: MutableList<Pair<Int, String>> = httpClient.downlaodMarathonData()
 
     // シェイク検知に必要な定数・変数
     private val SHAKE_TIMEOUT = 500
@@ -26,7 +28,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_spectator)
-        Log.d(TAG, "SpectatorActivity is Started")
+        Log.d("HttpClientTAG", "$allMarathonData")
 
         mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         mAccelerometer = mSensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
