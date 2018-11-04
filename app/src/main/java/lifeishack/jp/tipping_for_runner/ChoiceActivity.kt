@@ -3,6 +3,7 @@ package lifeishack.jp.tipping_for_runner
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Button
 import com.linecorp.linesdk.LineProfile
 import com.linecorp.linesdk.api.LineApiClient
@@ -14,10 +15,12 @@ class ChoiceActivity : AppCompatActivity() {
 
     var lineApiClient: LineApiClient? = null
     private var toSpectatorButton: Button? = null
+    private val httpClient: HttpClient = HttpClient()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choice)
+        httpClient.fetchMarathonName()
 
         //LineAPIClientの初期化として必要なようです
         val apiClientBuilder = LineApiClientBuilder(applicationContext, "1619051002")
@@ -29,6 +32,7 @@ class ChoiceActivity : AppCompatActivity() {
         //これで名前とかidとかとれるっぽい
         println(profile.displayName)
         println(profile.userId)
+        Log.d("Profile", profile.userId)
 
         toSpectatorButton = findViewById(R.id.toSpectator) as Button
         toSpectatorButton?.setOnClickListener {
