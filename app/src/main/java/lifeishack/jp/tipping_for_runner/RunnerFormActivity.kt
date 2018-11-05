@@ -5,12 +5,18 @@ import android.app.ProgressDialog
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.View
-import android.widget.*
-import com.squareup.moshi.Json
-import kotlinx.android.synthetic.main.activity_runner_form.*
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
+import com.github.kittinunf.fuel.android.extension.responseJson
+import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.result.Result
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -18,18 +24,6 @@ import java.io.OutputStream
 import java.io.PrintStream
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.concurrent.CountDownLatch
-import android.widget.AdapterView
-import android.widget.Spinner
-import android.widget.AdapterView.OnItemSelectedListener
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.android.extension.responseJson
-import com.github.kittinunf.fuel.core.FuelManager
-import com.github.kittinunf.result.Result
-import com.squareup.moshi.JsonAdapter
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
-import org.json.JSONArray
 
 
 class RunnerFormActivity : AppCompatActivity() {
@@ -40,6 +34,9 @@ class RunnerFormActivity : AppCompatActivity() {
 
     private var lineId: String = ""
     private var lineName: String = ""
+
+    internal var mHandler: Handler = Handler()
+    internal var mCounter: Int = 0
 
     private var allMarathonData: MutableList<Pair<Int, String>> = mutableListOf()
     private var spinnerItems: ArrayList<String> = ArrayList()
@@ -100,36 +97,65 @@ class RunnerFormActivity : AppCompatActivity() {
 
 
 
-    private fun downloadMarathonData(): MutableList<Pair<Int, String>> {
-        doAsync {
-            var json :JSONArray
-            val (request, response, result) = Fuel.get("/marathon").responseJson()
-            if (result.component2() != null) {
-                Log.d("HttpClientTAG", "ERROR: ${result.component2()}")
-            }
+    private fun downloadMarathonData() {
+        "/marathon".httpGet().responseJson {request, response, result ->
             when (result) {
                 is Result.Success -> {
-                    json = result.value.array()
-                    copyMarathonData(json)
+                    val json = result.value.array()
+                    copyMarathonData(json, "id", "name", allMarathonData)
+                    Log.d("HttpClientTAG", "downloadMarathonData is completed: ${allMarathonData}")
                 }
                 is Result.Failure -> {
+                    Log.d("HttpClientTAG", "downloadMarathonData is Failed")
                 }
             }
         }
-        return allMarathonData
+        val thread = Thread(Runnable {
+            try {
+                mCounter = 0
+                while (mCounter < 5) {
+                    // ここで時間稼ぎ
+                    Thread.sleep(1000)
+                    Log.d("HttpClientTAG", "Thread Waiting: ${mCounter}")
+                    mCounter++
+                }
+                // 繰り返しが終わったところで次のActivityに遷移する
+                mHandler.post {
+                    // この部分はUIスレッドで動作する
+                    val contentList: MutableList<String> = mutableListOf()
+                    for ((_, v) in allMarathonData) {
+                        contentList.add(v)
+                    }
+                    val adapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, contentList)
+                    marathonSpinner?.adapter = adapter
+                }
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+        })
+        thread.start()
     }
 
-    private fun copyMarathonData(jsonArray: JSONArray) {
-        allMarathonData = mutableListOf()
+    private fun copyMarathonData(jsonArray: JSONArray, component1: String, component2: String, targetList: MutableList<Pair<Int, String>>) {
+        // 更新時に前のデータに上書きするため
+        targetList.clear()
         for (i in 0..jsonArray.length() - 1) {
             val jsonObj = jsonArray[i] as JSONObject
-            spinnerItems.add(jsonObj.get("name").toString())
-            allMarathonData.add(Pair(jsonObj.get("id").toString().toInt(), jsonObj.get("name").toString()))
+            targetList.add(Pair(jsonObj.get(component1).toString().toInt(), jsonObj.get(component2).toString()))
         }
-        println("copyMarathonData")
-        println(spinnerItems)
-        println(allMarathonData)
     }
+
+//    private fun copyMarathonData(jsonArray: JSONArray) {
+//        allMarathonData = mutableListOf()
+//        for (i in 0..jsonArray.length() - 1) {
+//            val jsonObj = jsonArray[i] as JSONObject
+//            spinnerItems.add(jsonObj.get("name").toString())
+//            allMarathonData.add(Pair(jsonObj.get("id").toString().toInt(), jsonObj.get("name").toString()))
+//        }
+//        println("copyMarathonData")
+//        println(spinnerItems)
+//        println(allMarathonData)
+//    }
 
 
 //    private fun downloadMarathonData() {
