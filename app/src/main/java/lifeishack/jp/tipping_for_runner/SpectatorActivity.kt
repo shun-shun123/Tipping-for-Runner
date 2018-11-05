@@ -5,6 +5,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.github.kittinunf.fuel.Fuel
@@ -32,8 +33,12 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private var mShakeCount = 0
     private var preAccel: Float = 1.0F
 
+    // <marathonID, marathon Name>
     private var allMarathonData: MutableList<Pair<Int, String>> = mutableListOf()
     private val baseUrl: String = "https://d15af500.ngrok.io"
+
+    // <marathonID, RunnerName>
+    private var allRunnnerData: MutableList<Pair<Int, String>> = mutableListOf()
 
     init {
         FuelManager.instance.basePath = baseUrl
@@ -53,13 +58,19 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
         mSensorManager?.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL)
-        allMarathonData = downloadMarathonData()
+        downloadMarathonData()
+        for ((k, v) in allMarathonData) {
+            downloadRunnerData(k)
+        }
         Log.d("HttpClientTAG", "onResume: $allMarathonData")
+        Log.d("HttpClientTAG", "onResume: $allRunnnerData")
     }
 
     override fun onPause() {
         super.onPause()
         mSensorManager?.unregisterListener(this)
+        allMarathonData = mutableListOf()
+        allRunnnerData = mutableListOf()
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -78,7 +89,15 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                     // シェイク中
                     mShakeCount++
                 } else {
-                    Log.d(TAG, "${mShakeCount} times shaken")
+                    AlertDialog.Builder(this)
+                            .setTitle("投げ銭しますか？")
+                            .setPositiveButton("はい！") {dialog, which ->
+                                Log.d(TAG,"投げ銭: ${mShakeCount}")
+                            }
+                            .setNegativeButton("いいえ") {dialog, which ->
+
+                            }
+                            .show()
                     mShakeCount = 0
                 }
                 mLastTime = now
@@ -91,7 +110,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
         Log.d(TAG, "Sensor Accuracy Changed")
     }
 
-    private fun downloadMarathonData(): MutableList<Pair<Int, String>> {
+    private fun downloadMarathonData() {
         doAsync {
             val (request, response, result) = Fuel.get("/marathon").responseJson()
             if (result.component2() != null) {
@@ -100,7 +119,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
             when (result) {
                 is Result.Success -> {
                     val json = result.value.array()
-                    copyMarathonData(json)
+                    copyMarathonData(json, "id", "name", allMarathonData)
                     Log.d("HttpClientTAG", "allMarathonDataにコピーしたよ\n${allMarathonData}")
                 }
                 is Result.Failure -> {
@@ -108,14 +127,31 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 }
             }
         }
-        return allMarathonData
     }
 
-    private fun copyMarathonData(jsonArray: JSONArray) {
-        allMarathonData = mutableListOf()
+    private fun downloadRunnerData(marathonID: Int) {
+        doAsync {
+            val (request, response, result) = Fuel.get("/runner/$marathonID").responseJson()
+            if (result.component2() != null) {
+                Log.d("HttpClientGET", "ERROR(RUNNER): ${result.component2()}")
+            }
+            when (result) {
+                is Result.Success -> {
+                    val json = result.value.array()
+                    copyMarathonData(json, "id", "name", allRunnnerData)
+                    Log.d("HttpClientTAG", "${this@doAsync}: Success")
+                }
+                is Result.Failure -> {
+                    Log.d("HttpClientTAG", "${this@doAsync}: Faild")
+                }
+            }
+        }
+    }
+
+    private fun copyMarathonData(jsonArray: JSONArray, component1: String, component2: String, targetList: MutableList<Pair<Int, String>>) {
         for (i in 0..jsonArray.length() - 1) {
             val jsonObj = jsonArray[i] as JSONObject
-            allMarathonData.add(Pair(jsonObj.get("id").toString().toInt(), jsonObj.get("name").toString()))
+            targetList.add(Pair(jsonObj.get(component1).toString().toInt(), jsonObj.get(component2).toString()))
         }
     }
 }

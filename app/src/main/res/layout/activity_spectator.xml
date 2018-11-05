@@ -6,4 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".SpectatorActivity">
 
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="368dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="78dp" />
 </android.support.constraint.ConstraintLayout>
