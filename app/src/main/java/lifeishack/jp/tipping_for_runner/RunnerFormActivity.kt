@@ -8,10 +8,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
+import android.view.View
+import android.widget.*
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
@@ -32,15 +30,17 @@ class RunnerFormActivity : AppCompatActivity() {
     var bibNumberText: EditText? = null
     var submitButton: Button? = null
 
+
     private var lineId: String = ""
     private var lineName: String = ""
+    private var marathonID: Int = 0
 
     internal var mHandler: Handler = Handler()
     internal var mCounter: Int = 0
 
     private var allMarathonData: MutableList<Pair<Int, String>> = mutableListOf()
     private var spinnerItems: ArrayList<String> = ArrayList()
-    private val baseUrl: String = "https://tipping-for-runner.herokuapp.com"
+    private val baseUrl: String = "https://073af05b.ngrok.io"
 
 
 
@@ -67,6 +67,21 @@ class RunnerFormActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         marathonSpinner!!.adapter = adapter
 
+        marathonSpinner?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                for ((k, v) in allMarathonData) {
+                    if (k == position + 1) {
+                        marathonID = k
+                        break
+                    }
+                }
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+            }
+        }
+
+
+
 
         bibNumberText = findViewById(R.id.bibNumber)
         submitButton = findViewById(R.id.submitButton)
@@ -87,11 +102,12 @@ class RunnerFormActivity : AppCompatActivity() {
         submitButton?.setOnClickListener {
             val marathonName = marathonSpinner!!.selectedItem.toString()
             val bibNumber = bibNumberText?.text.toString()
-            println(marathonName)
             println(bibNumber)
             println(lineId)
             println(lineName)
-//            postRunnerData(marathonName, bibNumber, lineId)
+            println(marathonID)
+            println("postRunnerData")
+            postRunnerData(bibNumber)
         }
     }
 
@@ -145,108 +161,19 @@ class RunnerFormActivity : AppCompatActivity() {
         }
     }
 
-//    private fun copyMarathonData(jsonArray: JSONArray) {
-//        allMarathonData = mutableListOf()
-//        for (i in 0..jsonArray.length() - 1) {
-//            val jsonObj = jsonArray[i] as JSONObject
-//            spinnerItems.add(jsonObj.get("name").toString())
-//            allMarathonData.add(Pair(jsonObj.get("id").toString().toInt(), jsonObj.get("name").toString()))
-//        }
-//        println("copyMarathonData")
-//        println(spinnerItems)
-//        println(allMarathonData)
-//    }
-
-
-//    private fun downloadMarathonData() {
-//        val builder = Uri.Builder()
-//        val latch = CountDownLatch(1)
-//        val task = getMarathonRequest()
-//        task.execute();
-//
-//    }
-
-//    inner class getMarathonRequest(): AsyncTask<Uri.Builder, Void, Void>() {
-//        override fun doInBackground(vararg builder: Uri.Builder): Void? {
-//
-////            val url = URL("https://073af05b.ngrok.io/marathon")
-//            val url = URL("https://tipping-for-runner.herokuapp.com/marathon")
-//            val http = url.openConnection() as HttpURLConnection
-//
-//
-//            try {
-//                println("start")
-//                http.addRequestProperty("Content-Type", "application/json; charset=UTF-8")
-//                http.setRequestMethod("GET")
-//                http.doInput = true
-//                http.connect()
-//
-//                println("response,reader,resultです")
-//                val responseCode = http.responseCode
-//                println(responseCode)
-//                val ret = http.inputStream
-//                val reader: BufferedReader = BufferedReader(InputStreamReader(ret))
-//                val result = reader.readLine()
-//                println("result")
-//                val splitFirst = result.split("[")
-//                val splitSecond = splitFirst[1].split("]")
-////                println(splitSecond)
-////                println(splitSecond[0])
-//
-//
-//                val runnerList = splitSecond[0].split(",")
-//                println("runnerList")
-//                println(runnerList)
-//                println("size")
-//                println(runnerList[0])
-//                println(runnerList.size)
-//                println(runnerList[1])
-////                for(list in runnerList) {
-////                    val JsonObj = JSONObject(list)
-////                    println(JsonObj)
-////                    println(JsonObj["id"])
-////                }
-//
-//                //ここからテスト
-////                val parentJsonObj = JSONObject(splitSecond[0])
-////                println("parentJsonObj")
-////                println(parentJsonObj)
-//                return null
-//            } catch (e: InterruptedException) {
-//                println("Interruptです")
-//                println(e)
-//                return null
-//            } finally {
-//                http.disconnect()
-//                println("finallyです")
-//                return null
-//            }
-//            return null
-//        }
-//
-//        override fun onPostExecute(result: Void?) {
-//            super.onPostExecute(result)
-//            println("onPostExecute")
-//        }
-//    }
-
-
-
-    private fun postRunnerData(marasonName: String, bibNumber: String, lineId: String) {
+    private fun postRunnerData(bibNumber: String) {
         val builder = Uri.Builder()
-        val task = runnerFormRequest(this, marasonName, bibNumber, lineId)
+        val task = runnerFormRequest(bibNumber)
         task.execute(builder);
     }
 
-    inner class runnerFormRequest(activity: Activity, marasonName: String, bibNumber: String, lineId: String): AsyncTask<Uri.Builder, Void, Void>() {
+    inner class runnerFormRequest(bibNumber: String): AsyncTask<Uri.Builder, Void, Void>() {
 
-        private var mainActivity: Activity? = activity
-        private var name: String = ""
-        private var number: String = bibNumber
-        private var marathon_id: Int = 111
+        private var line_name: String = lineName
+        private var bibInt: Int = Integer.parseInt(bibNumber)
+        private var marathon_id: Int = marathonID
         private var line_user_id: String = lineId
 
-        private var numberKari: Int = 123456
         override fun doInBackground(vararg builder: Uri.Builder): Void? {
             // httpリクエスト投げる処理を書く。
 
@@ -254,15 +181,17 @@ class RunnerFormActivity : AppCompatActivity() {
             val http = url.openConnection() as HttpURLConnection
             var result: String = ""
 
+
             val json = """
             {
-                "name": "${name}",
-                "number": ${numberKari},
+                "name": "${line_name}",
+                "number": ${bibInt},
                 "marathon_id": "${marathon_id}",
-                "line_user_id": "${line_user_id}"
+                "runner_line_id": "${line_user_id}"
             }
             """
-
+            println("json")
+            println(json)
             try {
                 http.addRequestProperty("Content-Type", "application/json; charset=UTF-8")
                 http.setRequestMethod("POST");
