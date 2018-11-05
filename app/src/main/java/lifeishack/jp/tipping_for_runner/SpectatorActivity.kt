@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.ProgressBar
 import android.widget.Spinner
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
@@ -56,6 +57,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private var marathonID: Int = 0
     private var runnerId: Int = 0
 
+    private var progressBar: ProgressBar? = null
+
     init {
         FuelManager.instance.basePath = baseUrl
     }
@@ -63,6 +66,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_spectator)
+
+        progressBar = findViewById(R.id.progressBar)
 
         lineId = intent.getStringExtra("LINE_ID")
         Log.d("HttpClientTAG", lineId)
@@ -218,12 +223,14 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                     // この部分はUIスレッドで動作する
                     spinner?.adapter = adapter
                     runnerSpinner?.adapter = runnerAdapter
+                    progressBar?.visibility = View.VISIBLE
                 }
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
         })
         thread.start()
+        progressBar?.visibility = View.INVISIBLE
 
 //        doAsync {
 //            val (request, response, result) = Fuel.get("/marathon").responseJson()
@@ -276,12 +283,14 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 mHandler.post {
                     // この部分はUIスレッドで動作する
                     runnerSpinner?.adapter = runnerAdapter
+                    progressBar?.visibility = View.VISIBLE
                 }
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
         })
         thread.start()
+        progressBar?.visibility = View.INVISIBLE
 //        doAsync {
 //            val (request, response, result) = Fuel.get("/runner/$marathonID").responseJson()
 //            if (result.component2() != null) {
