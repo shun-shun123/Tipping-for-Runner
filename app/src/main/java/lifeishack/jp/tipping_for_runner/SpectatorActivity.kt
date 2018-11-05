@@ -77,6 +77,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 for ((k, v) in allMarathonData) {
                     if (k == position + 1) {
                         marathonID = k
+                        downloadRunnerData(marathonID)
                         Log.d("SPINNER", "marathonID: ${marathonID}\nname: ${v}")
                         break
                     }
@@ -90,10 +91,16 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
 
         runnerSpinner = findViewById(R.id.runnerSpinner)
         runnerSpinner?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-
-            }
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                for ((k, _) in allRunnnerData) {
+                    if (k == position + 1) {
+                        runnerId = k
+                        break
+                    }
+                }
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {
 
             }
         }
@@ -132,10 +139,10 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                             .setTitle("投げ銭しますか？")
                             .setPositiveButton("はい！") {dialog, which ->
                                 Log.d(TAG,"投げ銭: ${mShakeCount}")
-                                val postContent: PostBody = PostBody(5, lineId)
+                                val postContent: PostBody = PostBody(mShakeCount, lineId)
                                 val adapter = Moshi.Builder().build().adapter(PostBody::class.java)
                                 val jsonObject = adapter.toJson(postContent)
-                                "/line/push/1".httpPost().jsonBody(jsonObject).response {request, response, result ->
+                                "/line/push/${runnerId}".httpPost().jsonBody(jsonObject).response {request, response, result ->
                                     if (result.component2() != null) {
                                         Log.d("HttpClientTAG", "${result.component2()}")
                                     }
@@ -176,6 +183,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                         downloadRunnerData(k)
                         Log.d("HttpClientTAG", "downloading Result: ${allMarathonData}\n${allRunnnerData}")
                     }
+//                    downloadRunnerData(marathonID)
+//                    Log.d("HttpClientTAG", "downloading Result: ${allMarathonData}\n${allRunnnerData}")
                 }
                 is Result.Failure -> {
                     Log.d("HttpClientTAG", "downloadMarathonData is Failed")
@@ -193,14 +202,22 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 }
                 // 繰り返しが終わったところで次のActivityに遷移する
                 Log.d("HttpClientTAG", "downloadData: ${allMarathonData}\n${allRunnnerData}")
+
                 val adapterContent: MutableList<String> = mutableListOf()
-                for ((_, v) in allMarathonData) {
+                for ((k, v) in allMarathonData) {
                     adapterContent.add(v)
                 }
                 val adapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, adapterContent)
+
+                val runnerContent: MutableList<String> = mutableListOf()
+                for ((_, v) in allRunnnerData) {
+                    runnerContent.add(v)
+                }
+                val runnerAdapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, runnerContent)
                 mHandler.post {
                     // この部分はUIスレッドで動作する
                     spinner?.adapter = adapter
+                    runnerSpinner?.adapter = runnerAdapter
                 }
             } catch (e: InterruptedException) {
                 e.printStackTrace()
@@ -239,6 +256,32 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 }
             }
         }
+        val thread = Thread(Runnable {
+            try {
+                mCounter = 0
+                while (mCounter < 5) {
+                    // ここで時間稼ぎ
+                    Thread.sleep(1000)
+                    Log.d("HttpClientTAG", "Thread Waiting: ${mCounter}")
+                    mCounter++
+                }
+                // 繰り返しが終わったところで次のActivityに遷移する
+                Log.d("HttpClientTAG", "downloadData: ${allMarathonData}\n${allRunnnerData}")
+
+                val runnerContent: MutableList<String> = mutableListOf()
+                for ((_, v) in allRunnnerData) {
+                    runnerContent.add(v)
+                }
+                val runnerAdapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, runnerContent)
+                mHandler.post {
+                    // この部分はUIスレッドで動作する
+                    runnerSpinner?.adapter = runnerAdapter
+                }
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+        })
+        thread.start()
 //        doAsync {
 //            val (request, response, result) = Fuel.get("/runner/$marathonID").responseJson()
 //            if (result.component2() != null) {
@@ -258,6 +301,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun copyMarathonData(jsonArray: JSONArray, component1: String, component2: String, targetList: MutableList<Pair<Int, String>>) {
+        // 更新時に前のデータに上書きするため
+        targetList.clear()
         for (i in 0..jsonArray.length() - 1) {
             val jsonObj = jsonArray[i] as JSONObject
             targetList.add(Pair(jsonObj.get(component1).toString().toInt(), jsonObj.get(component2).toString()))
