@@ -5,14 +5,20 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import com.github.kittinunf.fuel.Fuel
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
-import org.jetbrains.anko.doAsync
+import com.squareup.moshi.Moshi
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.pow
@@ -35,10 +41,20 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
 
     // <marathonID, marathon Name>
     private var allMarathonData: MutableList<Pair<Int, String>> = mutableListOf()
-    private val baseUrl: String = "https://d15af500.ngrok.io"
+    private val baseUrl: String = "https://073af05b.ngrok.io"
 
     // <marathonID, RunnerName>
     private var allRunnnerData: MutableList<Pair<Int, String>> = mutableListOf()
+
+    internal var mHandler: Handler = Handler()
+    internal var mCounter: Int = 0
+
+    private var spinner: Spinner? = null
+    private var runnerSpinner: Spinner? = null
+
+    // POSTするのに使うパラメータ
+    private var marathonID: Int = 0
+    private var runnerId: Int = 0
 
     init {
         FuelManager.instance.basePath = baseUrl
@@ -53,17 +69,40 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
 
         mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         mAccelerometer = mSensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        spinner = findViewById(R.id.spinner)
+        spinner?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                Log.d("SPINNER", "position: ${position}")
+                for ((k, v) in allMarathonData) {
+                    if (k == position + 1) {
+                        marathonID = k
+                        Log.d("SPINNER", "marathonID: ${marathonID}\nname: ${v}")
+                        break
+                    }
+                }
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+
+            }
+        }
+
+        runnerSpinner = findViewById(R.id.runnerSpinner)
+        runnerSpinner?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+
+            }
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         mSensorManager?.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL)
         downloadMarathonData()
-        for ((k, v) in allMarathonData) {
-            downloadRunnerData(k)
-        }
-        Log.d("HttpClientTAG", "onResume: $allMarathonData")
-        Log.d("HttpClientTAG", "onResume: $allRunnnerData")
     }
 
     override fun onPause() {
@@ -93,6 +132,22 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                             .setTitle("投げ銭しますか？")
                             .setPositiveButton("はい！") {dialog, which ->
                                 Log.d(TAG,"投げ銭: ${mShakeCount}")
+                                val postContent: PostBody = PostBody(5, lineId)
+                                val adapter = Moshi.Builder().build().adapter(PostBody::class.java)
+                                val jsonObject = adapter.toJson(postContent)
+                                "/line/push/1".httpPost().jsonBody(jsonObject).response {request, response, result ->
+                                    if (result.component2() != null) {
+                                        Log.d("HttpClientTAG", "${result.component2()}")
+                                    }
+                                    when (result) {
+                                        is Result.Success -> {
+                                            Log.d("HttpClientTAG", "POST Success")
+                                        }
+                                        is Result.Failure -> {
+                                            Log.d("HttpClientTAG", "POST Failed")
+                                        }
+                                    }
+                                }
                             }
                             .setNegativeButton("いいえ") {dialog, which ->
 
@@ -111,41 +166,95 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun downloadMarathonData() {
-        doAsync {
-            val (request, response, result) = Fuel.get("/marathon").responseJson()
-            if (result.component2() != null) {
-                Log.d("HttpClientTAG", "ERROR: ${result.component2()}")
-            }
+        "/marathon".httpGet().responseJson {request, response, result ->
             when (result) {
                 is Result.Success -> {
                     val json = result.value.array()
                     copyMarathonData(json, "id", "name", allMarathonData)
-                    Log.d("HttpClientTAG", "allMarathonDataにコピーしたよ\n${allMarathonData}")
+                    Log.d("HttpClientTAG", "downloadMarathonData is completed")
+                    for ((k, _) in allMarathonData) {
+                        downloadRunnerData(k)
+                        Log.d("HttpClientTAG", "downloading Result: ${allMarathonData}\n${allRunnnerData}")
+                    }
                 }
                 is Result.Failure -> {
-                    Log.d("HttpClientTAG", "ERRORYEHAAAAAAAAAAA")
+                    Log.d("HttpClientTAG", "downloadMarathonData is Failed")
                 }
             }
         }
+        val thread = Thread(Runnable {
+            try {
+                mCounter = 0
+                while (mCounter < 5) {
+                    // ここで時間稼ぎ
+                    Thread.sleep(1000)
+                    Log.d("HttpClientTAG", "Thread Waiting: ${mCounter}")
+                    mCounter++
+                }
+                // 繰り返しが終わったところで次のActivityに遷移する
+                Log.d("HttpClientTAG", "downloadData: ${allMarathonData}\n${allRunnnerData}")
+                val adapterContent: MutableList<String> = mutableListOf()
+                for ((_, v) in allMarathonData) {
+                    adapterContent.add(v)
+                }
+                val adapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, adapterContent)
+                mHandler.post {
+                    // この部分はUIスレッドで動作する
+                    spinner?.adapter = adapter
+                }
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+        })
+        thread.start()
+
+//        doAsync {
+//            val (request, response, result) = Fuel.get("/marathon").responseJson()
+//            if (result.component2() != null) {
+//                Log.d("HttpClientTAG", "ERROR: ${result.component2()}")
+//            }
+//            when (result) {
+//                is Result.Success -> {
+//                    val json = result.value.array()
+//                    copyMarathonData(json, "id", "name", allMarathonData)
+//                    Log.d("HttpClientTAG", "allMarathonDataにコピーしたよ\n${allMarathonData}")
+//                }
+//                is Result.Failure -> {
+//                    Log.d("HttpClientTAG", "ERRORYEHAAAAAAAAAAA")
+//                }
+//            }
+//        }
     }
 
     private fun downloadRunnerData(marathonID: Int) {
-        doAsync {
-            val (request, response, result) = Fuel.get("/runner/$marathonID").responseJson()
-            if (result.component2() != null) {
-                Log.d("HttpClientGET", "ERROR(RUNNER): ${result.component2()}")
-            }
+        "/runner/${marathonID}".httpGet().responseJson {request, response, result ->
             when (result) {
                 is Result.Success -> {
                     val json = result.value.array()
+                    Log.d("HttpClientTAG", "runner data(iD: ${marathonID}): ${json}")
                     copyMarathonData(json, "id", "name", allRunnnerData)
-                    Log.d("HttpClientTAG", "${this@doAsync}: Success")
                 }
                 is Result.Failure -> {
-                    Log.d("HttpClientTAG", "${this@doAsync}: Faild")
+                    Log.d("HttpClientTAG", "Faild to downloadRunnerData")
                 }
             }
         }
+//        doAsync {
+//            val (request, response, result) = Fuel.get("/runner/$marathonID").responseJson()
+//            if (result.component2() != null) {
+//                Log.d("HttpClientTAG", "ERROR(RUNNER): ${result.component2()}")
+//            }
+//            when (result) {
+//                is Result.Success -> {
+//                    val json = result.value.array()
+//                    copyMarathonData(json, "id", "name", allRunnnerData)
+//                    Log.d("HttpClientTAG", "${this@doAsync}: Success")
+//                }
+//                is Result.Failure -> {
+//                    Log.d("HttpClientTAG", "${this@doAsync}: Faild")
+//                }
+//            }
+//        }
     }
 
     private fun copyMarathonData(jsonArray: JSONArray, component1: String, component2: String, targetList: MutableList<Pair<Int, String>>) {
@@ -155,3 +264,6 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 }
+
+
+data class PostBody(val number: Int, val audience_line_id: String)
