@@ -25,7 +25,9 @@ class ChoiceActivity : AppCompatActivity() {
         //profile情報をMainActivityより取得
         val profile: LineProfile = intent.getParcelableExtra("line_profile")
         //これで名前とかidとかとれるっぽい
+        println("idはこれこれ")
         println(profile.displayName)
+        println(profile.userId)
 
         val toSpectatorButton: Button = findViewById(R.id.audience)
         toSpectatorButton.setOnClickListener {
@@ -38,6 +40,7 @@ class ChoiceActivity : AppCompatActivity() {
         toRunnerButton.setOnClickListener {
             val intent: Intent = Intent(this@ChoiceActivity, RunnerFormActivity::class.java)
             intent.putExtra("LINE_ID", profile.userId)
+            intent.putExtra("LINE_NAME", profile.displayName)
             startActivity(intent)
         }
     }

@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
                 val transitionIntent = Intent(this, ChoiceActivity::class.java)
                 transitionIntent.putExtra("line_profile", result.lineProfile)
                 transitionIntent.putExtra("line_credential", result.lineCredential)
+                transitionIntent.putExtra("user_id", result.lineProfile?.userId)
                 startActivity(transitionIntent)
             }
 
