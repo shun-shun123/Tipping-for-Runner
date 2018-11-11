@@ -95,12 +95,13 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
         runnerSpinner = findViewById(R.id.runnerSpinner)
         runnerSpinner?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                for ((k, _) in allRunnnerData) {
-                    if (k == position + 1) {
-                        runnerId = k
-                        break
-                    }
-                }
+//                for ((k, _) in allRunnnerData) {
+//                    if (k == position + 1) {
+//                        runnerId = k
+//                        break
+//                    }
+//                }
+                runnerId = allRunnnerData[position].component1()
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
