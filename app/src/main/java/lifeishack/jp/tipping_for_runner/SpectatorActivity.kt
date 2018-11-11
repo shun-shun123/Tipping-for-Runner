@@ -32,8 +32,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private var lineId: String = ""
 
     // シェイク検知に必要な定数・変数
-    private val SHAKE_TIMEOUT = 500
-    private val FORCE_THRESHOLD = 6
+    private val SHAKE_TIMEOUT = 400
+    private val FORCE_THRESHOLD = 8
     private var mLastTime: Long = 0
     private var mShakeCount = 0
     private var preAccel: Float = 1.0F
