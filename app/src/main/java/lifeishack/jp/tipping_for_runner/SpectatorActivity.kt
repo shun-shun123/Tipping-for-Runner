@@ -144,6 +144,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                                 val adapter = Moshi.Builder().build().adapter(PostBody::class.java)
                                 val jsonObject = adapter.toJson(postContent)
                                 Log.d("Count", "count: ${mShakeCount}")
+                                Log.d("RUNNERID", "runnerId: ${runnerId}")
                                 "/line/push/${runnerId}".httpPost().jsonBody(jsonObject).response {request, response, result ->
                                     if (result.component2() != null) {
                                         Log.d("HttpClientTAG", "${result.component2()}")
