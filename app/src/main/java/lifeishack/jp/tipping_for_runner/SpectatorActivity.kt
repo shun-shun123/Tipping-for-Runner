@@ -34,8 +34,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private var lineId: String = ""
 
     // シェイク検知に必要な定数・変数
-    private val SHAKE_TIMEOUT = 400
-    private val FORCE_THRESHOLD = 8
+    private val SHAKE_TIMEOUT = 600
+    private val FORCE_THRESHOLD = 4
     private var mLastTime: Long = 0
     private var mShakeCount = 0
     private var preAccel: Float = 1.0F
@@ -143,6 +143,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                                 val postContent: PostBody = PostBody(mShakeCount, lineId)
                                 val adapter = Moshi.Builder().build().adapter(PostBody::class.java)
                                 val jsonObject = adapter.toJson(postContent)
+                                Log.d("Count", "count: ${mShakeCount}")
                                 "/line/push/${runnerId}".httpPost().jsonBody(jsonObject).response {request, response, result ->
                                     if (result.component2() != null) {
                                         Log.d("HttpClientTAG", "${result.component2()}")

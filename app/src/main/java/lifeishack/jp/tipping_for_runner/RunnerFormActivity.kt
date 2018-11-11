@@ -41,7 +41,7 @@ class RunnerFormActivity : AppCompatActivity() {
 
     private var allMarathonData: MutableList<Pair<Int, String>> = mutableListOf()
     private var spinnerItems: ArrayList<String> = ArrayList()
-    private val baseUrl: String = "https://073af05b.ngrok.io"
+    private val baseUrl: String = serverVariables.url
 
 
 
@@ -178,7 +178,7 @@ class RunnerFormActivity : AppCompatActivity() {
         override fun doInBackground(vararg builder: Uri.Builder): Void? {
             // httpリクエスト投げる処理を書く。
 
-            val url = URL("${serverVariables.url}/runner")
+            val url = URL(serverVariables.url + "/runner")
             val http = url.openConnection() as HttpURLConnection
             var result: String = ""
 
