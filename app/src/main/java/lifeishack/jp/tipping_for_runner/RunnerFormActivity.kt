@@ -1,6 +1,5 @@
 package lifeishack.jp.tipping_for_runner
 
-import android.app.Activity
 import android.app.ProgressDialog
 import android.net.Uri
 import android.os.AsyncTask
@@ -25,6 +24,8 @@ import java.net.URL
 
 
 class RunnerFormActivity : AppCompatActivity() {
+
+    val serverVariables = ServerVariables()
 
     var marathonSpinner: Spinner? = null
     var bibNumberText: EditText? = null
@@ -177,7 +178,7 @@ class RunnerFormActivity : AppCompatActivity() {
         override fun doInBackground(vararg builder: Uri.Builder): Void? {
             // httpリクエスト投げる処理を書く。
 
-            val url = URL("https://073af05b.ngrok.io/runner")
+            val url = URL("${serverVariables.url}/runner")
             val http = url.openConnection() as HttpURLConnection
             var result: String = ""
 

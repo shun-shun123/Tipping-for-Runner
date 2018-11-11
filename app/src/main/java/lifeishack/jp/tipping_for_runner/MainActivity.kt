@@ -1,19 +1,20 @@
 package lifeishack.jp.tipping_for_runner
 
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import com.linecorp.linesdk.LineApiResponseCode
-
-import com.linecorp.linesdk.auth.LineLoginApi;
-import com.linecorp.linesdk.auth.LineLoginResult;
+import com.linecorp.linesdk.auth.LineLoginApi
+import com.linecorp.linesdk.auth.LineLoginResult
 
 private val REQUEST_CODE = 1
 
 class MainActivity : AppCompatActivity() {
+
+    val serverVariables = ServerVariables()
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         loginButton.setOnClickListener { v ->
             try {
                 // App-to-app login channelIDはべんちゃのLINE IDで作ったチャンネルのIDです。
-                val loginIntent = LineLoginApi.getLoginIntent(v.context, "1619051002");
+                val loginIntent = LineLoginApi.getLoginIntent(v.context, serverVariables.channel);
                 startActivityForResult(loginIntent, REQUEST_CODE)
 
             } catch (e: Exception) {

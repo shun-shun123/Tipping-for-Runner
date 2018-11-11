@@ -9,8 +9,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class HttpClient {
+
+    val serverVariables = ServerVariables()
     private val TAG: String = "HttpClientTAG"
-    private val baseUrl: String = "https://d15af500.ngrok.io"
+    private val baseUrl: String = serverVariables.url
 
     init {
         FuelManager.instance.basePath = baseUrl

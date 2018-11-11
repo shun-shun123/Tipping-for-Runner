@@ -25,6 +25,8 @@ import kotlin.math.sqrt
 
 class SpectatorActivity : AppCompatActivity(), SensorEventListener {
 
+    val serverVariables = ServerVariables()
+
     private var mSensorManager: SensorManager? = null
     private var mAccelerometer: Sensor? = null
     private val TAG: String = "SpectatorActivity"
@@ -40,7 +42,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
 
     // <marathonID, marathon Name>
     private var allMarathonData: MutableList<Pair<Int, String>> = mutableListOf()
-    private val baseUrl: String = "https://073af05b.ngrok.io"
+    private val baseUrl: String = serverVariables.url
 
     // <marathonID, RunnerName>
     private var allRunnnerData: MutableList<Pair<Int, String>> = mutableListOf()

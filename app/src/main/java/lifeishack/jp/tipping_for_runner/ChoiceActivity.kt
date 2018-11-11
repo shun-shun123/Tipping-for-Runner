@@ -12,6 +12,7 @@ import com.linecorp.linesdk.api.LineApiClientBuilder
 //Login後の画面。RunnerとAudienceの選択画面の予定
 class ChoiceActivity : AppCompatActivity() {
 
+    val serverVariables = ServerVariables()
     var lineApiClient: LineApiClient? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +20,7 @@ class ChoiceActivity : AppCompatActivity() {
         setContentView(R.layout.activity_choice)
 
         //LineAPIClientの初期化として必要なようです
-        val apiClientBuilder = LineApiClientBuilder(applicationContext, "1619051002")
+        val apiClientBuilder = LineApiClientBuilder(applicationContext, serverVariables.channel)
         lineApiClient = apiClientBuilder.build()
 
         //profile情報をMainActivityより取得
