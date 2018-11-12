@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="100dp">
+    android:layout_height="100dp"
+    android:layout_margin="10dp"
+    >
 
     <TextView
         android:id="@+id/runner_number"
-        android:layout_width="100dp"
-        android:layout_height="match_parent"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@drawable/runner_number_background"
         android:gravity="center"
+        android:layout_margin="5dp"
         android:text="30"
-        android:textSize="50sp" />
+        android:textColor="@color/white"
+        android:textSize="40sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -34,6 +39,7 @@
             android:layout_height="match_parent"
             android:layout_margin="5dp"
             android:layout_weight="1"
+            android:fontFamily="@font/AvenirLTStd-Book"
             android:gravity="center"
             android:text="RUNNER"
             android:textSize="20sp" />
