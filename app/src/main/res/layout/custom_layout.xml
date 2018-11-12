@@ -9,10 +9,11 @@
         android:id="@+id/runner_number"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:background="@drawable/runner_number_background"
-        android:gravity="center"
         android:layout_margin="5dp"
-        android:text="30"
+        android:background="@drawable/runner_number_background"
+        android:fontFamily="@font/type_gothic"
+        android:gravity="center"
+        android:text="12"
         android:textColor="@color/white"
         android:textSize="40sp" />
 
@@ -29,6 +30,7 @@
             android:layout_height="match_parent"
             android:layout_margin="5dp"
             android:layout_weight="1"
+            android:fontFamily="@font/type_gothic"
             android:gravity="center"
             android:text="大阪マラソン"
             android:textSize="20sp" />
@@ -39,9 +41,9 @@
             android:layout_height="match_parent"
             android:layout_margin="5dp"
             android:layout_weight="1"
-            android:fontFamily="@font/avenir_ltstd_book"
+            android:fontFamily="@font/type_gothic"
             android:gravity="center"
-            android:text="RUNNER"
+            android:text="斉藤　俊介"
             android:textSize="20sp" />
 
     </LinearLayout>
