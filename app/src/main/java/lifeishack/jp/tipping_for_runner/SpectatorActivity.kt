@@ -81,6 +81,18 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 downloadRunnerData(marathonID)
             }
         }
+
+        runnerListView?.setOnItemClickListener { adapterView, view, position, id ->
+            var index = 0
+            for ((k, v) in allRunnerData) {
+                if (index == position) {
+                    runnerId = k
+                    Log.d("HttpClinetTAG", "${v} is selected")
+                }
+                index++
+            }
+            isLocked = false
+        }
     }
 
     override fun onResume() {
@@ -110,7 +122,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                     // シェイク中
                     mShakeCount++
                 } else {
-                    if (!isLocked || true) {
+                    if (!isLocked) {
+                                isLocked = true
                                 confirmSending().show()
                     }
                     mShakeCount = 0
@@ -140,9 +153,11 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                             }
                             is Result.Failure -> Log.d("HttpClientTAG", "POST Failed")
                         }
+                        isLocked = false
                     }
                 }
                 .setNegativeButton("いいえ") { _, _ ->
+                    isLocked = false
                 }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
