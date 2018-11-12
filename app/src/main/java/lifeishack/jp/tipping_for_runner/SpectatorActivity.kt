@@ -52,6 +52,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private var marathonDataSpinner: Spinner? = null
     private var runnerListView: ListView? = null
     private var runnerListViewAdapter: RunnerListCustomAdapter? = null
+    private var selectedView: View? = null
 
     // POSTするのに使うパラメータ
     private var marathonID: Int = 0
@@ -83,6 +84,9 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
         }
 
         runnerListView?.setOnItemClickListener { adapterView, view, position, id ->
+            selectedView?.setBackgroundResource(R.color.white)
+            selectedView = view
+            selectedView?.setBackgroundResource(R.color.colorPrimary)
             var index = 0
             for ((k, v) in allRunnerData) {
                 if (index == position) {
