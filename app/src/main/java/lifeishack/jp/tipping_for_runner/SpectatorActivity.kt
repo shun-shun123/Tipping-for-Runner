@@ -29,7 +29,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
 
     private var mSensorManager: SensorManager? = null
     private var mAccelerometer: Sensor? = null
-    private val TAG: String = "SpectatorActivity"
+    private val TAG: String = "HttpClientTAG"
 
     private var lineId: String = ""
 
@@ -87,7 +87,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
             for ((k, v) in allRunnerData) {
                 if (index == position) {
                     runnerId = k
-                    Log.d("HttpClinetTAG", "${v} is selected")
+                    Log.d(TAG, "${v} is selected")
                 }
                 index++
             }
@@ -144,14 +144,14 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                     val jsonObject = adapter.toJson(postContent)
                     "/line/push/${runnerId}".httpPost().jsonBody(jsonObject).response { _, _, result ->
                         if (result.component2() != null) {
-                            Log.d("HttpClientTAG", "POST Error: ${result.component2()}")
+                            Log.d(TAG, "POST Error: ${result.component2()}")
                         }
                         when (result) {
                             is Result.Success -> {
-                                Log.d("HttpClientTAG", "POST Success")
+                                Log.d(TAG, "POST Success")
                                 Toast.makeText(this@SpectatorActivity, "投げ銭完了！", Toast.LENGTH_LONG).show()
                             }
-                            is Result.Failure -> Log.d("HttpClientTAG", "POST Failed")
+                            is Result.Failure -> Log.d(TAG, "POST Failed")
                         }
                         isLocked = false
                     }
@@ -170,7 +170,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 is Result.Success -> {
                     val json = result.value.array()
                     copyMarathonData(json, "id", "name", allMarathonData)
-                    Log.d("HttpClientTAG", "downloadMarathonData is completed")
+                    Log.d(TAG, "downloadMarathonData is completed")
                 }
                 is Result.Failure -> Log.d("HttpClientTAG", "downloadMarathonData is Failed")
             }
@@ -186,7 +186,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 while (mCounter < 3) {
                     // ここで時間稼ぎ
                     Thread.sleep(1000)
-                    Log.d("HttpClientTAG", "Thread Waiting: ${mCounter}")
+                    Log.d(TAG, "Thread Waiting: ${mCounter}")
                     mCounter++
                 }
                 val marathonDataList: MutableList<String> = mutableListOf()
@@ -213,7 +213,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
         "/runner/$marathonID".httpGet().responseJson {_, _, result ->
             when (result) {
                 is Result.Success -> copyMarathonData(result.value.array(), "id", "name", allRunnerData)
-                is Result.Failure -> Log.d("HttpClientTAG", "Faild to downloadRunnerData")
+                is Result.Failure -> Log.d(TAG, "Faild to downloadRunnerData")
             }
         }
 
@@ -227,13 +227,13 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 while (mCounter < 3) {
                     // ここで時間稼ぎ
                     Thread.sleep(1000)
-                    Log.d("HttpClientTAG", "Thread Waiting: ${mCounter}")
+                    Log.d(TAG, "Thread Waiting: ${mCounter}")
                     mCounter++
                 }
-                Log.d("HttpClientTAG", "downloadData: ${allMarathonData}\n${allRunnerData}")
+                Log.d(TAG, "downloadData: ${allMarathonData}\n${allRunnerData}")
                 val runnerDataList: MutableList<CustomListData> = mutableListOf()
                 for ((k, v) in allRunnerData) {
-                    runnerDataList.add(CustomListData(k.toString(), allMarathonData[marathonDataSpinner?.selectedItemPosition!!].component1().toString(), v))
+                    runnerDataList.add(CustomListData(k.toString(), allMarathonData[marathonDataSpinner?.selectedItemPosition!!].component2(), v))
                 }
                 runnerListViewAdapter = RunnerListCustomAdapter(this, runnerDataList)
                 mHandler.post {
