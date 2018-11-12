@@ -39,7 +39,7 @@
             android:layout_height="match_parent"
             android:layout_margin="5dp"
             android:layout_weight="1"
-            android:fontFamily="@font/AvenirLTStd-Book"
+            android:fontFamily="@font/avenir_ltstd_book"
             android:gravity="center"
             android:text="RUNNER"
             android:textSize="20sp" />
