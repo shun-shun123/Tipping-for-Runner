@@ -51,7 +51,8 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     internal var mCounter: Int = 0
 
     private var spinner: Spinner? = null
-    private var runnerSpinner: Spinner? = null
+    private var runnerListView: ListView? = null
+    private var runnerListViewAdapter: ArrayAdapter<String>? = null
 
     // POSTするのに使うパラメータ
     private var marathonID: Int = 0
@@ -70,7 +71,6 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
         progressBar = findViewById(R.id.progressBar)
 
         lineId = intent.getStringExtra("LINE_ID")
-        Log.d("HttpClientTAG", lineId)
 
         mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         mAccelerometer = mSensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -80,7 +80,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
         spinner = findViewById(R.id.spinner)
         spinner?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                for ((k, v) in allMarathonData) {
+                for ((k, _) in allMarathonData) {
                     if (k == position + 1) {
                         marathonID = k
                         downloadRunnerData(marathonID)
@@ -92,20 +92,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
             }
         }
 
-        runnerSpinner = findViewById(R.id.runnerSpinner)
-        runnerSpinner?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-//                for ((k, _) in allRunnnerData) {
-//                    if (k == position + 1) {
-//                        runnerId = k
-//                        break
-//                    }
-//                }
-                runnerId = allRunnnerData[position].component1()
-            }
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-            }
-        }
+        runnerListView = findViewById(R.id.runners)
     }
 
     override fun onResume() {
@@ -184,12 +171,10 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                     val json = result.value.array()
                     copyMarathonData(json, "id", "name", allMarathonData)
                     Log.d("HttpClientTAG", "downloadMarathonData is completed")
-                    for ((k, _) in allMarathonData) {
-                        downloadRunnerData(k)
-                        Log.d("HttpClientTAG", "downloading Result: ${allMarathonData}\n${allRunnnerData}")
-                    }
-//                    downloadRunnerData(marathonID)
-//                    Log.d("HttpClientTAG", "downloading Result: ${allMarathonData}\n${allRunnnerData}")
+//                    for ((k, _) in allMarathonData) {
+//                        downloadRunnerData(k)
+//                        Log.d("HttpClientTAG", "downloading Result: ${allMarathonData}\n${allRunnnerData}")
+//                    }
                 }
                 is Result.Failure -> {
                     Log.d("HttpClientTAG", "downloadMarathonData is Failed")
@@ -209,26 +194,17 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                     Log.d("HttpClientTAG", "Thread Waiting: ${mCounter}")
                     mCounter++
                 }
-                // 繰り返しが終わったところで次のActivityに遷移する
-                Log.d("HttpClientTAG", "downloadData: ${allMarathonData}\n${allRunnnerData}")
 
                 val adapterContent: MutableList<String> = mutableListOf()
-                for ((k, v) in allMarathonData) {
+                for ((_, v) in allMarathonData) {
                     adapterContent.add(v)
                 }
                 val adapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, adapterContent)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-                val runnerContent: MutableList<String> = mutableListOf()
-                for ((_, v) in allRunnnerData) {
-                    runnerContent.add(v)
-                }
-                val runnerAdapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, runnerContent)
-                runnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 mHandler.post {
                     // この部分はUIスレッドで動作する
                     spinner?.adapter = adapter
-                    runnerSpinner?.adapter = runnerAdapter
                     progressBar?.visibility = View.INVISIBLE
                     window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                 }
@@ -269,10 +245,10 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 for ((_, v) in allRunnnerData) {
                     runnerContent.add(v)
                 }
-                val runnerAdapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, runnerContent)
+                runnerListViewAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, runnerContent)
                 mHandler.post {
                     // この部分はUIスレッドで動作する
-                    runnerSpinner?.adapter = runnerAdapter
+                    runnerListView?.adapter = runnerListViewAdapter
                     progressBar?.visibility = View.INVISIBLE
                     window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                 }
