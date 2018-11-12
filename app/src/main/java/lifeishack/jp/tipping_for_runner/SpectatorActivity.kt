@@ -51,7 +51,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
 
     private var marathonDataSpinner: Spinner? = null
     private var runnerListView: ListView? = null
-    private var runnerListViewAdapter: ArrayAdapter<String>? = null
+    private var runnerListViewAdapter: RunnerListCustomAdapter? = null
 
     // POSTするのに使うパラメータ
     private var marathonID: Int = 0
@@ -231,11 +231,11 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                     mCounter++
                 }
                 Log.d("HttpClientTAG", "downloadData: ${allMarathonData}\n${allRunnerData}")
-                val runnerDataList: MutableList<String> = mutableListOf()
-                for ((_, v) in allRunnerData) {
-                    runnerDataList.add(v)
+                val runnerDataList: MutableList<CustomListData> = mutableListOf()
+                for ((k, v) in allRunnerData) {
+                    runnerDataList.add(CustomListData(k.toString(), allMarathonData[marathonDataSpinner?.selectedItemPosition!!].component1().toString(), v))
                 }
-                runnerListViewAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, runnerDataList)
+                runnerListViewAdapter = RunnerListCustomAdapter(this, runnerDataList)
                 mHandler.post {
                     // この部分はUIスレッドで動作する
                     runnerListView?.adapter = runnerListViewAdapter
