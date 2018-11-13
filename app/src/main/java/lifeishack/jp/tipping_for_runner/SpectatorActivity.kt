@@ -30,6 +30,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private var mSensorManager: SensorManager? = null
     private var mAccelerometer: Sensor? = null
     private val TAG: String = "HttpClientTAG"
+    private var progbarBackground: ImageView? = null
 
     private var lineId: String = ""
 
@@ -52,6 +53,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
     private var marathonDataSpinner: Spinner? = null
     private var runnerListView: ListView? = null
     private var runnerListViewAdapter: RunnerListCustomAdapter? = null
+    private var selectedView: View? = null
 
     // POSTするのに使うパラメータ
     private var marathonID: Int = 0
@@ -63,6 +65,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_spectator)
 
+        progbarBackground = findViewById(R.id.progressbar_background)
         progressBar = findViewById(R.id.progressBar)
         marathonDataSpinner = findViewById(R.id.spinner)
         runnerListView = findViewById(R.id.runners)
@@ -83,6 +86,9 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
         }
 
         runnerListView?.setOnItemClickListener { adapterView, view, position, id ->
+            selectedView?.setBackgroundResource(R.color.white)
+            selectedView = view
+            selectedView?.setBackgroundResource(R.color.colorPrimary)
             var index = 0
             for ((k, v) in allRunnerData) {
                 if (index == position) {
@@ -180,10 +186,13 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
             try {
                 mCounter = 0
                 mHandler.post {
+                    // marathonDataを更新すると、spinnerの情報も更新され、結果的に新しくマラソンを選択することになる。
+                    // spinnerで選択すると、downloadRunnerDataが走るようになっているため、ここのスレッドではprogressbarもprogbarBackgroundもVISIBLEのままでOK
                     progressBar?.visibility = View.VISIBLE
+                    progbarBackground?.visibility = View.VISIBLE
                     window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                 }
-                while (mCounter < 3) {
+                while (mCounter < 2) {
                     // ここで時間稼ぎ
                     Thread.sleep(1000)
                     Log.d(TAG, "Thread Waiting: ${mCounter}")
@@ -199,7 +208,6 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 mHandler.post {
                     // この部分はUIスレッドで動作する
                     marathonDataSpinner?.adapter = marathonSpinnerAdapter
-                    progressBar?.visibility = View.INVISIBLE
                     window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                 }
             } catch (e: InterruptedException) {
@@ -222,9 +230,10 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                 mCounter = 0
                 mHandler.post {
                     progressBar?.visibility = View.VISIBLE
+                    progbarBackground?.visibility = View.VISIBLE
                     window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                 }
-                while (mCounter < 3) {
+                while (mCounter < 2) {
                     // ここで時間稼ぎ
                     Thread.sleep(1000)
                     Log.d(TAG, "Thread Waiting: ${mCounter}")
@@ -240,6 +249,7 @@ class SpectatorActivity : AppCompatActivity(), SensorEventListener {
                     // この部分はUIスレッドで動作する
                     runnerListView?.adapter = runnerListViewAdapter
                     progressBar?.visibility = View.INVISIBLE
+                    progbarBackground?.visibility = View.INVISIBLE
                     window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                 }
             } catch (e: InterruptedException) {
