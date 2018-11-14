@@ -25,7 +25,7 @@ import kotlin.math.sqrt
 
 class SpectatorActivity : AppCompatActivity(), SensorEventListener {
 
-    val serverVariables = ServerVariables()
+    private val serverVariables = ServerVariables()
 
     private var mSensorManager: SensorManager? = null
     private var mAccelerometer: Sensor? = null
